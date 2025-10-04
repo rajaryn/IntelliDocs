@@ -1,0 +1,22 @@
+# Python virtual environment
+venv/
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+
+# IDE and editor folders
+.vscode/
+.idea/
+
+# Database files
+*.sqlite3
+*.db
+*.sql
+
+# Logs
+logs/
+*.log
+
+chroma_db/

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Registration Successful</title>
+    </head>
+<body>
+    <h2>Registration Successful! ✅</h2>
+    
+    <p><strong>Migrant ID:</strong> {{ migrant.id }}</p>
+    <p><strong>Name:</strong> {{ migrant.name }}</p>
+    <p><strong>Age:</strong> {{ migrant.age }}</p>
+    <p><strong>State:</strong> {{ migrant.state }}</p>
+
+    {% if migrant.report_url %}
+        <p>
+            <strong>Uploaded Report:</strong> 
+            <a href="{{ migrant.report_url }}" target="_blank">View Report</a>
+        </p>
+    {% endif %}
+
+    <h3>Migrant QR Code:</h3>
+        <img src="data:image/png;base64, {{ qr_image }}" alt="Migrant QR Code">
+        
+        <br>
+
+        <a href="data:image/png;base64, {{ qr_image }}"
+           download="migrant_qr_{{ migrant.id }}.png"
+           class="download-btn">
+           Download QR Code
+        </a>
+
+    <br>
+    <a href="/">Register Another Migrant</a>
+</body>
+</html>

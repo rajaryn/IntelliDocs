@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ document_filename }}</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+    />
+    <style>
+      body,
+      html {
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+      .viewer-container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        background-color: var(--pico-background-color);
+      }
+      .viewer-header {
+        flex-shrink: 0;
+        z-index: 10;
+      }
+
+      /* --- UPDATED: Main Content Grid Layout --- */
+      .main-content {
+        flex-grow: 1;
+        display: grid;
+        /* Left column is a fixed 320px, right column takes the rest */
+        grid-template-columns: 320px 1fr;
+        gap: 1.5rem;
+        padding: 0 1.5rem 1.5rem 1.5rem;
+        overflow: hidden;
+      }
+
+      /* --- Renamed to .sidebar for clarity --- */
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        overflow: auto;
+      }
+
+      /* --- UPDATED: More Compact Controls --- */
+      .pdf-controls {
+        background-color: var(--pico-card-background-color);
+        padding: 0.75rem; /* Reduced padding */
+        border: 1px solid var(--pico-card-border-color);
+        border-radius: var(--pico-border-radius);
+      }
+      .control-group {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem; /* Reduced margin */
+      }
+      .control-group:last-child {
+        margin-bottom: 0;
+      }
+      .control-group button {
+        width: auto;
+        padding: 0.2rem 0.6rem; /* Smaller button padding */
+        margin: 0;
+        font-size: 0.8em; /* Smaller button font */
+      }
+      .control-group span {
+        font-size: 0.9em; /* Smaller text font */
+      }
+
+      #ai-panel {
+        flex-grow: 1;
+        background-color: var(--pico-card-background-color);
+        padding: 1rem;
+        border: 1px solid var(--pico-card-border-color);
+        border-radius: var(--pico-border-radius);
+      }
+
+      .pdf-viewer {
+        overflow: auto;
+        display: flex;
+        justify-content: center;
+        height: 100%;
+      }
+      #pdf-canvas {
+        border: 1px solid var(--pico-card-border-color);
+        box-shadow: var(--pico-card-box-shadow);
+        max-width: none !important;
+        flex-shrink: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="viewer-container">
+      <nav class="container-fluid viewer-header">
+        <ul>
+          <li>
+            <strong
+              ><a href="{{ url_for('dashboard') }}"
+                >← Back to Dashboard</a
+              ></strong
+            >
+          </li>
+          <li>{{ document_filename }}</li>
+        </ul>
+        <ul>
+          <li><a href="#" class="secondary">{{ session.user_email }}</a></li>
+          <li>
+            <form
+              action="{{ url_for('logout') }}"
+              method="post"
+              style="margin-bottom: 0"
+            >
+              <button
+                type="submit"
+                class="secondary outline"
+                style="width: auto; padding: 0.5rem 1rem; margin: 0"
+              >
+                Logout
+              </button>
+            </form>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="main-content">
+        <div class="sidebar">
+          <div id="pdf-controls" class="pdf-controls">
+            <div class="control-group">
+              <button id="prev-page">Previous</button>
+              <span
+                >Page: <span id="page-num">--</span> /
+                <span id="page-count">--</span></span
+              >
+              <button id="next-page">Next</button>
+            </div>
+            <hr style="margin: 0.5rem 0" />
+            <div class="control-group">
+              <button id="zoom-out">-</button>
+              <span>Zoom: <span id="zoom-percent">100</span>%</span>
+              <button id="zoom-in">+</button>
+            </div>
+          </div>
+
+          <div id="ai-panel">
+            <h4 style="margin-bottom: 0.5rem">Summary</h4>
+
+            {% if document_summary %} {# The style="white-space: pre-wrap;"
+            preserves paragraphs and line breaks from your summary #}
+            <p style="white-space: pre-wrap">{{ document_summary }}</p>
+            {% else %}
+            <p>No summary is available for this document.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div id="pdf-viewer" class="pdf-viewer" data-url="{{ document_url }}">
+          <div id="loading-spinner" class="loading-spinner"></div>
+          <canvas id="pdf-canvas" style="display: none"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="{{ url_for('static', filename='script.js') }}"
+      type="module"
+    ></script>
+  </body>
+</html>

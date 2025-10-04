@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <style>
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        main.container { max-width: 500px; }
+        .error { color: var(--pico-color-red-500); background-color: var(--pico-color-red-100); padding: 0.5rem; border-radius: var(--pico-border-radius); margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <article>
+            <h1 style="text-align: center;">Create Your Account</h1>
+            <p style="text-align: center; margin-top: -1rem; margin-bottom: 2rem;">Get started by creating your free account.</p>
+
+            {% if error_message %}
+                <div class="error">{{ error_message }}</div>
+            {% endif %}
+
+            <form method="post" action={{url_for('register')}}>
+                <label for="email">
+                    Email address
+                    <input type="email" id="email" name="email" placeholder="you@example.com" value="{{ email or '' }}" required>
+                </label>
+
+                <label for="password">
+                    Password
+                    <input type="password" id="password" name="password" placeholder="Choose a strong password" required>
+                </label>
+                
+                <label for="confirm_password">
+                    Confirm Password
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-type your password" required>
+                </label>
+
+                <button type="submit">Create Account</button>
+            </form>
+            <div style="text-align: center; margin-top: 1rem;">
+                <a href="{{ url_for('login') }}">Already have an account? Sign In</a>
+            </div>
+        </article>
+    </main>
+</body>
+</html>

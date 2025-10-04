@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <style>
+        body { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        main.container { max-width: 500px; }
+        .error { color: var(--pico-color-red-500); background-color: var(--pico-color-red-100); padding: 0.5rem; border-radius: var(--pico-border-radius); margin-bottom: 1rem; }
+        .success { color: var(--pico-color-green-600); background-color: var(--pico-color-green-100); padding: 1rem; border-radius: var(--pico-border-radius); margin-bottom: 1rem; text-align: center; }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <article>
+            <h1 style="text-align: center;">Welcome Back</h1>
+            <p style="text-align: center; margin-top: -1rem; margin-bottom: 2rem;">Enter your credentials to sign in.</p>
+
+            {% if success_message %}
+                <div class="success">{{ success_message }}</div>
+            {% endif %}
+
+            {% if error_message %}
+                <div class="error">{{ error_message }}</div>
+            {% endif %}
+
+            <form method="post",action="/login">
+                <label for="email">
+                    Email address
+                    <input type="email" id="email" name="email" placeholder="you@example.com" value="{{ email or '' }}" required>
+                </label>
+                <label for="password">
+                    Password
+                    <input type="password" id="password" name="password" required>
+                </label>
+                <button type="submit">Sign In</button>
+            </form>
+            <div style="text-align: center; margin-top: 1rem;">
+                <a href="#">Forgot Password?</a>
+            </div>
+        </article>
+    </main>
+</body>
+</html>
