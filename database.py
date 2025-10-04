@@ -1,34 +1,73 @@
 import os,dotenv
 import mysql.connector
-from mysql.connector import Error
+from mysql.connector import Error,pooling
 
-# --- Database Configuration ---
-DB_CONFIG = {
-    'host': os.getenv('DB_HOST', 'localhost'),
-    'user': os.getenv('DB_USER', 'root'),
-    'password': os.getenv('DB_PASSWORD')
-}
 
-DB_NAME = os.getenv('DB_NAME', 'notes_db')
+# This function should be called from app.py AFTER load_dotenv()
+def create_db_pool():
+    """Creates a connection pool for the database."""
+    try:
+        pool = pooling.MySQLConnectionPool(
+            pool_name="intellidocs_pool",
+            pool_size=5,
+            host=os.getenv('DB_HOST', 'localhost'),
+            user=os.getenv('DB_USER', 'root'),
+            password=os.getenv('DB_PASSWORD'),
+            database=os.getenv('DB_NAME', 'notes_db') # Connect directly to the DB
+        )
+        print("Database connection pool created successfully.")
+        return pool
+    except Error as e:
+        print(f"Error creating connection pool: {e}")
+        return None
+    
+cnx_pool = create_db_pool()
+
+def get_db_connection():
+    """Gets a connection from the pool."""
+    if cnx_pool is None:
+        print("Connection pool is not available.")
+        return None
+    try:
+        # Get a connection from the pool
+        conn = cnx_pool.get_connection()
+        return conn
+    except Error as e:
+        print(f"Error getting connection from pool: {e}")
+        return None
 
 def init_db():
+    conn = None
+    cursor = None
     try:
-        print("Connecting to MySQL server...")
-        conn = mysql.connector.connect(**DB_CONFIG)  #(**) dictionary unpacking operator
+        # Step 1: Connect to the server WITHOUT a specific database to create it
+        print("Connecting to MySQL server to ensure database exists...")
+        conn = mysql.connector.connect(
+            host=os.getenv('DB_HOST', 'localhost'),
+            user=os.getenv('DB_USER', 'root'),
+            password=os.getenv('DB_PASSWORD')
+        )
         cursor = conn.cursor()
-        
-        # --- Step 2: Create the main database if it doesn't exist ---
-        print(f"Checking if database '{DB_NAME}' exists...")
-        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME} DEFAULT CHARACTER SET 'utf8'")
-        print(f"Database '{DB_NAME}' is ready.")
-        cursor.close()
-        conn.close()
+        db_name = os.getenv('DB_NAME', 'notes_db')
+        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {db_name} DEFAULT CHARACTER SET 'utf8mb4'")
+        print(f"Database '{db_name}' is ready.")
 
-        # --- Step 3: Connect to the specific application database ---
-        print(f"Connecting to database '{DB_NAME}'...")
-        conn = mysql.connector.connect(database=DB_NAME, **DB_CONFIG)
-        cursor = conn.cursor()
+    except Error as e:
+        print(f"Error during initial database creation: {e}")
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
 
+    # Step 2: Use a connection from the pool to create the tables
+    conn = get_db_connection()
+    if conn is None:
+        print("Could not get DB connection from pool to create tables.")
+        return
+    
+    try:
+        cursor=conn.cursor()
+        print("Ensuring tables are created...")
         users_table_sql = """
         CREATE TABLE IF NOT EXISTS users (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -56,27 +95,16 @@ def init_db():
         cursor.execute(documents_table_sql)
         print("'documents' table is ready.")
 
-        # more table creation statements here later
-
-       
-
     except Error as e:
-        print(f"Error during database initialization: {e}")
+        print(f"Error during table creation: {e}")
     finally:
-        # --- Step 5: Clean up the connection ---
-        if conn.is_connected():
+        if conn and conn.is_connected():
             cursor.close()
-            conn.close()
-            print("MySQL connection is closed.")
+            conn.close() # This returns the connection to the pool
+            print("Connection returned to pool.")
 
-def get_db_connection():
-    """Establishes a connection to the specific application database."""
-    try:
-        conn = mysql.connector.connect(database=DB_NAME, **DB_CONFIG)
-        return conn
-    except Error as e:
-        print(f"Error connecting to database: {e}")
-        return None
+
+
 
 # -------To add a user ---------
 def add_user(email, password_hash):
