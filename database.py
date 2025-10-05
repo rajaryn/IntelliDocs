@@ -80,7 +80,7 @@ def init_db():
         print("'users' table is ready.")
 
         documents_table_sql=""" 
-        CREATE TABLE documents (
+        CREATE TABLE IF NOT EXISTS documents (
           id INT AUTO_INCREMENT PRIMARY KEY,
           user_id INT NOT NULL,
           filename VARCHAR(255) NOT NULL,

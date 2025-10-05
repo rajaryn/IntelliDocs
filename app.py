@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
 from flask import Flask,session
 from flask import render_template
 from flask import request,redirect
@@ -12,7 +16,7 @@ import secrets
 import processing
 import fitz
 import ai_utils
-import os,dotenv
+
 
 
 database.init_db()  # Ensures DB and tables exist
